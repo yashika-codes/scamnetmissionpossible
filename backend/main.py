@@ -5,10 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List
 
-from backend.config import HOST, PORT
-from backend.services.gemini_service import analyze_scam_text
-from backend.services.whisper_service import transcribe_audio
-from backend.services.graph_service import fraud_graph_service
+from config import HOST, PORT
+from services.gemini_service import analyze_scam_text
+from services.whisper_service import transcribe_audio
+from services.graph_service import fraud_graph_service
 
 app = FastAPI(
     title="SCAMNET API",

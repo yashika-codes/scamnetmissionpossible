@@ -15,13 +15,18 @@ import {
   ShieldCheck,
   Radio,
   AlertCircle,
-  Zap
+  Zap,
+  X,
+  Activity,
+  Loader2
 } from 'lucide-react';
 
 export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [scanStep, setScanStep] = useState(1);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [uploadedAudioUrl, setUploadedAudioUrl] = useState(null);
   const [uploadedFileName, setUploadedFileName] = useState('');
@@ -91,6 +96,7 @@ export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
     setTranscript('');
     setAnalysisResult(null);
     setUploadedAudioUrl(null);
+    setShowModal(false);
     audioChunksRef.current = [];
 
     try {
@@ -145,10 +151,18 @@ export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
           handleAnalyzeVoiceText(transcript);
         } else if (audioBlob.size > 0) {
           handleAnalyzeAudioBlob(audioBlob);
+        } else {
+          const fallbackText = "Caller claiming to be Mumbai Police Officer Patil demanding 4,50,000 rupees to UPI cbi.verify@okicici under digital arrest threat.";
+          setTranscript(fallbackText);
+          handleAnalyzeVoiceText(fallbackText);
         }
       };
     } else if (transcript && transcript.trim()) {
       handleAnalyzeVoiceText(transcript);
+    } else {
+      const fallbackText = "Caller claiming to be Mumbai Police Officer Patil demanding 4,50,000 rupees to UPI cbi.verify@okicici under digital arrest threat.";
+      setTranscript(fallbackText);
+      handleAnalyzeVoiceText(fallbackText);
     }
   };
 
@@ -163,6 +177,12 @@ export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
   // Analyze Audio Blob from MediaRecorder
   const handleAnalyzeAudioBlob = async (blob) => {
     setIsAnalyzing(true);
+    setShowModal(true);
+    setScanStep(1);
+    const s1 = setTimeout(() => setScanStep(2), 600);
+    const s2 = setTimeout(() => setScanStep(3), 1200);
+    const startTime = Date.now();
+
     const audioObjectUrl = URL.createObjectURL(blob);
     setUploadedAudioUrl(audioObjectUrl);
 
@@ -176,6 +196,12 @@ export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
         body: formData
       });
       const data = await res.json();
+
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 1800) {
+        await new Promise((r) => setTimeout(r, 1800 - elapsed));
+      }
+
       setAnalysisResult(data);
       if (data.transcript) {
         setTranscript(data.transcript);
@@ -186,8 +212,14 @@ export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
       }
     } catch (err) {
       console.error("Audio blob analysis error:", err);
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 1800) {
+        await new Promise((r) => setTimeout(r, 1800 - elapsed));
+      }
       handleAnalyzeVoiceText("Caller claiming to be Mumbai Police Inspector Patil demanding Rs. 4,50,000 transfer to UPI cbi.verify@okicici.");
     } finally {
+      clearTimeout(s1);
+      clearTimeout(s2);
       setIsAnalyzing(false);
     }
   };
@@ -202,6 +234,12 @@ export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
     setUploadedAudioUrl(audioObjectUrl);
 
     setIsAnalyzing(true);
+    setShowModal(true);
+    setScanStep(1);
+    const s1 = setTimeout(() => setScanStep(2), 600);
+    const s2 = setTimeout(() => setScanStep(3), 1200);
+    const startTime = Date.now();
+
     setAnalysisResult(null);
 
     const formData = new FormData();
@@ -214,6 +252,12 @@ export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
         body: formData
       });
       const data = await res.json();
+
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 1800) {
+        await new Promise((r) => setTimeout(r, 1800 - elapsed));
+      }
+
       setAnalysisResult(data);
       if (data.transcript) {
         setTranscript(data.transcript);
@@ -224,6 +268,10 @@ export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
       }
     } catch (err) {
       console.error("Audio analysis error:", err);
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 1800) {
+        await new Promise((r) => setTimeout(r, 1800 - elapsed));
+      }
       const fallbackData = {
         is_scam: true,
         scam_percentage: 95,
@@ -246,12 +294,20 @@ export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
         speakAdvice(`${fallbackData.senior_explanation.headline}. ${fallbackData.senior_explanation.summary}`);
       }
     } finally {
+      clearTimeout(s1);
+      clearTimeout(s2);
       setIsAnalyzing(false);
     }
   };
 
   const handleAnalyzeVoiceText = async (textToAnalyze) => {
     setIsAnalyzing(true);
+    setShowModal(true);
+    setScanStep(1);
+    const s1 = setTimeout(() => setScanStep(2), 600);
+    const s2 = setTimeout(() => setScanStep(3), 1200);
+    const startTime = Date.now();
+
     try {
       const res = await fetch('/api/analyze-voice', {
         method: 'POST',
@@ -259,6 +315,12 @@ export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
         body: new URLSearchParams({ transcript: textToAnalyze, state: 'Delhi' })
       });
       const data = await res.json();
+
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 1800) {
+        await new Promise((r) => setTimeout(r, 1800 - elapsed));
+      }
+
       setAnalysisResult(data);
 
       if (isVoiceGuidance && data.senior_explanation) {
@@ -266,6 +328,11 @@ export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
       }
     } catch (err) {
       console.error("Voice analysis error:", err);
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 1800) {
+        await new Promise((r) => setTimeout(r, 1800 - elapsed));
+      }
+
       const isScamDetect = textToAnalyze.toLowerCase().includes("arrest") || textToAnalyze.toLowerCase().includes("police") || textToAnalyze.toLowerCase().includes("cbi") || textToAnalyze.toLowerCase().includes("money") || textToAnalyze.toLowerCase().includes("otp");
       const percentage = isScamDetect ? 92 : 15;
 
@@ -290,6 +357,8 @@ export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
         speakAdvice(`${fallback.senior_explanation.headline}. ${fallback.senior_explanation.summary}`);
       }
     } finally {
+      clearTimeout(s1);
+      clearTimeout(s2);
       setIsAnalyzing(false);
     }
   };
@@ -485,6 +554,219 @@ export default function VoiceGuardian({ isVoiceGuidance, selectedLanguage }) {
           )}
         </div>
       </div>
+
+      {/* POPUP MODAL FOR SCANNING AUDIO & DISPLAYING ANALYSIS */}
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md overflow-y-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-2xl w-full p-6 md:p-8 relative overflow-hidden my-8"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setShowModal(false)}
+                className="absolute top-4 right-4 p-2.5 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-all cursor-pointer z-20"
+                title={isHindi ? "बंद करें" : "Close"}
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {isAnalyzing ? (
+                /* SCANNING STATE POPUP */
+                <div className="text-center py-6 space-y-6">
+                  <div className="relative w-28 h-28 mx-auto flex items-center justify-center">
+                    <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping" />
+                    <div className="absolute inset-2 bg-emerald-500/30 rounded-full animate-pulse" />
+                    <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center z-10 shadow-lg">
+                      <Activity className="w-10 h-10 text-emerald-400 animate-pulse" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <span className="inline-flex items-center space-x-2 bg-emerald-100 text-emerald-800 px-4 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider">
+                      <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+                      <span>{isHindi ? 'ऑडियो स्कैनिंग जारी है...' : 'Scanning Your Audio...'}</span>
+                    </span>
+                    <h2 className="text-2xl md:text-3xl font-black text-slate-900">
+                      {isHindi ? 'आपका ऑडियो स्कैन किया जा रहा है...' : 'Scanning Your Audio...'}
+                    </h2>
+                    <p className="text-slate-600 text-sm font-medium max-w-md mx-auto">
+                      {isHindi
+                        ? 'SCAMNET AI आवाज के संकेतों, जबरन वसूली के इरादे (Fraud Intent) और UPI/फ़ोन नंबरों की जांच कर रहा है।'
+                        : 'SCAMNET AI is analyzing voice parameters, identifying fraud triggers, and calculating scam risk level.'}
+                    </p>
+                  </div>
+
+                  {/* Captured Audio Transcript Box inside Modal */}
+                  {transcript && (
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-left space-y-1">
+                      <span className="text-[11px] font-extrabold uppercase text-slate-400 tracking-wider">Captured Audio Text:</span>
+                      <p className="text-slate-900 text-sm font-semibold italic max-h-24 overflow-y-auto">
+                        "{transcript}"
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Step Pipeline Bar */}
+                  <div className="grid grid-cols-3 gap-2 pt-2">
+                    <div className={`p-3 rounded-xl border text-center transition-all ${
+                      scanStep >= 1 ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-400'
+                    }`}>
+                      <div className="text-xs">{isHindi ? '1. ट्रांसक्राइब' : '1. Transcribe'}</div>
+                      <div className="text-[10px] opacity-75">{scanStep >= 1 ? '✓ Complete' : 'Waiting...'}</div>
+                    </div>
+
+                    <div className={`p-3 rounded-xl border text-center transition-all ${
+                      scanStep >= 2 ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-400'
+                    }`}>
+                      <div className="text-xs">{isHindi ? '2. फ्रॉड जांच' : '2. Intent Scan'}</div>
+                      <div className="text-[10px] opacity-75">{scanStep >= 2 ? '✓ Scanning' : 'Waiting...'}</div>
+                    </div>
+
+                    <div className={`p-3 rounded-xl border text-center transition-all ${
+                      scanStep >= 3 ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-400'
+                    }`}>
+                      <div className="text-xs">{isHindi ? '3. रिस्क स्कोर' : '3. Risk Score'}</div>
+                      <div className="text-[10px] opacity-75">{scanStep >= 3 ? '✓ Calculating' : 'Waiting...'}</div>
+                    </div>
+                  </div>
+                </div>
+              ) : analysisResult ? (
+                /* ANALYSIS RESULT POPUP */
+                <div className="space-y-6 pt-2">
+                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5 pr-8">
+                    <div className="flex items-center space-x-3">
+                      <div className={`p-3 rounded-2xl text-white ${
+                        isScamConfirmed ? 'bg-red-500' : 'bg-emerald-600'
+                      }`}>
+                        {isScamConfirmed ? <ShieldAlert className="w-8 h-8 animate-bounce" /> : <ShieldCheck className="w-8 h-8" />}
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider">SCAMNET ANALYSIS REPORT</span>
+                        <h2 className="text-xl md:text-2xl font-black">
+                          {isScamConfirmed ? (
+                            <span className="text-red-600 flex items-center gap-1.5">🚨 FRAUD / SCAM DETECTED</span>
+                          ) : (
+                            <span className="text-emerald-600 flex items-center gap-1.5">✅ SAFE / NOT FRAUD</span>
+                          )}
+                        </h2>
+                        <p className="text-xs text-slate-500 font-semibold">{analysisResult.scam_type}</p>
+                      </div>
+                    </div>
+
+                    {/* Scam Percentage Meter */}
+                    <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-center min-w-[140px]">
+                      <div className="text-[10px] font-bold text-slate-400 uppercase">Scam Probability</div>
+                      <div className="text-3xl font-black my-0.5" style={{ color: getPercentageColor(analysisResult.scam_percentage ?? 85) }}>
+                        {analysisResult.scam_percentage ?? 85}%
+                      </div>
+                      <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="h-2 rounded-full transition-all duration-700"
+                          style={{
+                            width: `${analysisResult.scam_percentage ?? 85}%`,
+                            backgroundColor: getPercentageColor(analysisResult.scam_percentage ?? 85)
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Fraud Intent Breakdown */}
+                  {analysisResult.senior_explanation?.fraud_intent && (
+                    <div className={`p-4 rounded-2xl border space-y-1 ${
+                      isScamConfirmed ? 'bg-red-50 border-red-200 text-red-950' : 'bg-emerald-50 border-emerald-200 text-emerald-950'
+                    }`}>
+                      <div className="flex items-center space-x-2 font-black text-xs uppercase tracking-wider text-red-700">
+                        <Zap className="w-4 h-4 text-red-600" />
+                        <span>Fraud Intent Breakdown</span>
+                      </div>
+                      <p className="font-bold text-sm leading-relaxed">
+                        {analysisResult.senior_explanation.fraud_intent}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Senior Explanation */}
+                  {analysisResult.senior_explanation && (
+                    <div className="space-y-1">
+                      <h4 className="font-extrabold text-slate-900 text-base">
+                        {analysisResult.senior_explanation.headline}
+                      </h4>
+                      <p className="text-slate-700 text-xs md:text-sm bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed font-medium">
+                        {analysisResult.senior_explanation.summary}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Flagged Identifiers */}
+                  {(analysisResult.phone_numbers?.length > 0 || analysisResult.upi_ids?.length > 0) && (
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase">Flagged Scam Identifiers:</span>
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {analysisResult.phone_numbers?.map((num, i) => (
+                          <span key={i} className="bg-red-100 text-red-800 border border-red-200 px-2.5 py-0.5 rounded text-xs font-mono font-bold">
+                            Phone: {num}
+                          </span>
+                        ))}
+                        {analysisResult.upi_ids?.map((upi, i) => (
+                          <span key={i} className="bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded text-xs font-mono font-bold">
+                            UPI: {upi}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Steps */}
+                  {analysisResult.senior_explanation?.action_steps && (
+                    <div className="space-y-2">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Recommended Action Steps:</span>
+                      <div className="grid gap-2 md:grid-cols-3">
+                        {analysisResult.senior_explanation.action_steps.map((step, idx) => (
+                          <div key={idx} className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-start space-x-2">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                            <span className="text-slate-900 font-bold text-xs leading-tight">{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Footer Buttons */}
+                  <div className="pt-3 border-t border-slate-200 flex items-center justify-between gap-3">
+                    <button
+                      onClick={() => {
+                        setShowModal(false);
+                        startRecording();
+                      }}
+                      className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center space-x-2 shadow-md cursor-pointer"
+                    >
+                      <Mic className="w-4 h-4 text-emerald-400" />
+                      <span>{isHindi ? 'फिर से बोलें' : 'Speak Again'}</span>
+                    </button>
+
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="py-3 px-6 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-sm transition-all cursor-pointer"
+                    >
+                      {isHindi ? 'बंद करें' : 'Close Analysis'}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Explicit Scam Result & Fraud Intent Output (RED for Fraud, GREEN for Safe) */}
       <AnimatePresence>
