@@ -4,7 +4,11 @@ SCAMNET is a dual-view AI-powered fraud defense system built for India. It bridg
 
 ---
 
+<<<<<<< HEAD
 ## 🌟 Key Features
+=======
+## Key Features
+>>>>>>> 354435e4ff472b6bd1b84b295836605c1a770afa
 
 ### 1. Guardian Layer (Senior Citizen & Elder-Facing UI)
 - **Voice-First Reporting**: Large interactive glowing microphone visualizer with live speech-to-text recording, audio analysis, and plain-English scam explanation output.
@@ -29,6 +33,7 @@ SCAMNET is a dual-view AI-powered fraud defense system built for India. It bridg
 
 ---
 
+<<<<<<< HEAD
 ## 📁 Project File Structure
 
 ```
@@ -95,9 +100,15 @@ Open `http://localhost:5173` in your browser.
 
 ---
 
+=======
+>>>>>>> 354435e4ff472b6bd1b84b295836605c1a770afa
 ## 🎯 Verification & Demonstration Steps
 
 1. **Test Voice Guardian**: Click **Guardian View** -> Tap the big glowing microphone -> Speak or select `"Digital Arrest Call Sample"` -> Watch SCAMNET parse the threat and read out plain-English advice.
 2. **Test ScamShield Scanner**: Click **ScamShield Scanner** -> Select `"Digital Arrest Threat"` or `"Bank KYC Suspension"` sample -> Click **Check Message for Scam Risk**.
 3. **Test SafePay Guard**: Enter `cbi.verify@okicici` or `sbisecure.kyc@okaxis` -> Observe the **CRITICAL DANGER** alert and cross-state complaint linkage.
 4. **Test Cyber-Cell Intelligence Layer**: Switch top toggle to **Intelligence Layer** -> Explore the live SVG node graph topology, filter by entity type, and inspect active criminal syndicates spanning Delhi, West Bengal, and Kerala.
+<<<<<<< HEAD
+=======
+
+>>>>>>> 354435e4ff472b6bd1b84b295836605c1a770afa
